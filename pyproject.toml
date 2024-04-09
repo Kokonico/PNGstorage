@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "pngstorage"
+version = "0.1.0"
+description = ""
+authors = ["Kokonico <96935064+Kokonico@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pypng = "^0.20220715.0"
+pillow = "^10.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
