@@ -10,8 +10,6 @@ poetry install
 poetry run python PNGstorage.py
 ```
 
-note: the key is basically the password to your file, so don't lose it.
-
 ## Example
 
 ```bash
