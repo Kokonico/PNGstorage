@@ -4,8 +4,6 @@ from PIL import Image, PngImagePlugin
 import math
 
 
-# convert all bytes to pixels, and save as PNG
-
 def encode():
     """main"""
     # read file
@@ -16,13 +14,13 @@ def encode():
 
     # read file as bytes
     with open(file, 'rb') as f:
-        byte_data = f.read()
+        original_data = f.read()
 
     # Calculate the padding needed
-    padding = len(byte_data) % 3
+    padding = len(original_data) % 3
 
     # Add the padding to the byte data
-    byte_data += b'\x00' * padding
+    byte_data = original_data + b'\x00' * padding
 
     # Calculate total pixels and find width and height
     total_pixels = len(byte_data) // 3
@@ -47,6 +45,13 @@ def encode():
 
     # Save the new image
     image.save('output.png', pnginfo=pnginfo)
+
+    # Integrity check: decode the encoded image and compare with original data
+    decoded_data = image.tobytes()
+    if original_data == decoded_data:
+        print("Done! Encoded image integrity verified.")
+    else:
+        print("Error: Encoded image data does not match original data. Integrity check failed.")
 
     print("Done!")
 
