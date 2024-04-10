@@ -23,7 +23,6 @@ poetry run python PNGstorage.py
 
 Choice: 1
 
-Enter Key (leave blank for 0): 1234
 Select file (Select File (current path: /Users/Kokonico/PycharmProjects/PNGstorage): README.md
 
 Done!
