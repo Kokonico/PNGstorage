@@ -4,6 +4,7 @@ from PIL import Image, PngImagePlugin
 import math
 import numpy as np
 
+
 def encode(key: int = 0):
     """main"""
     # read file
