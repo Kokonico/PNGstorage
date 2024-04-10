@@ -2,10 +2,11 @@
 import os
 from PIL import Image, PngImagePlugin
 import math
-import numpy as np
 
 
-def encode(key: int = 0):
+# convert all bytes to pixels, and save as PNG
+
+def encode():
     """main"""
     # read file
     file = input(f"Select File (current path: {os.getcwd()}): ")
@@ -25,28 +26,22 @@ def encode(key: int = 0):
 
     # Calculate total pixels and find width and height
     total_pixels = len(byte_data) // 3
-    sqrt_pixels = math.ceil(math.sqrt(total_pixels))  # round up square root
+    sqrt_pixels = math.isqrt(total_pixels)  # integer square root
 
-    # offset pixel colors by key
-    byte_data = bytes((byte + key) % 256 for byte in byte_data)
-
-    # Calculate total pixels and find width and height
-    total_pixels = len(byte_data) // 4  # each pixel is 4 bytes in RGBA
-    sqrt_pixels = math.ceil(math.sqrt(total_pixels))  # round up square root
-
-    # offset pixel colors by key
-    byte_data = bytes((byte + key) % 256 for byte in byte_data)
-
-    # Calculate the number of transparent pixels needed
-    transparent_pixels = (sqrt_pixels * sqrt_pixels) - total_pixels
-
-    # Add the transparent pixels to the byte data
-    byte_data += b'\x00\x00\x00\x00' * transparent_pixels
+    # If total_pixels is a perfect square
+    if sqrt_pixels * sqrt_pixels == total_pixels:
+        width = height = sqrt_pixels
+    else:
+        # Find the largest factor of total_pixels near to sqrt_pixels
+        for factor in range(sqrt_pixels, 0, -1):
+            if total_pixels % factor == 0:
+                width, height = factor, total_pixels // factor
+                break
 
     # Convert the bytes to an image
-    image = Image.frombytes('RGBA', (sqrt_pixels, sqrt_pixels), byte_data)
+    image = Image.frombytes('RGB', (width, height), byte_data)
 
-    # Create the PNG object
+    # Create a PngInfo object and add a file type to it
     pnginfo = PngImagePlugin.PngInfo()
     pnginfo.add_text('file_type', file_extension)
 
@@ -56,7 +51,7 @@ def encode(key: int = 0):
     print("Done!")
 
 
-def decode(key: int = 0):
+def decode():
     # Open the image
     image = Image.open(input("Select Image: "))
 
@@ -68,16 +63,7 @@ def decode(key: int = 0):
         file_type = ''
 
     # Convert the image back to bytes
-    byte_data = np.array(image)
-
-    # Remove the transparent pixels
-    byte_data = byte_data[byte_data[..., 3] != 0]
-
-    # Flatten the array and convert it to bytes
-    byte_data = byte_data.flatten().tobytes()
-
-    # offset pixel colors by key
-    byte_data = bytes((byte - key) % 256 for byte in byte_data)
+    byte_data = image.tobytes()
 
     # Write the bytes back to a file
     with open(f'original_file{file_type}', 'wb') as f:
@@ -89,11 +75,9 @@ if __name__ == "__main__":
         choice = input("1. Encode\n2. Decode\n3. Exit\nChoice: ")
         match choice:
             case '1':
-                key = int(input("Enter Key (leave blank for 0): ") or 0)
-                encode(key)
+                encode()
             case '2':
-                key = int(input("Enter Key (leave blank for 0): ") or 0)
-                decode(key)
+                decode()
             case '3':
                 exit(0)
             case _:
