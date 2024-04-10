@@ -7,15 +7,20 @@ import math
 def encode():
     """main"""
     # read file
-    file = input(f"Select File (current path: {os.getcwd()}): ")
 
+    file = input(f"Select File (current path: {os.getcwd()}): ")
     # get a file extension
     _, file_extension = os.path.splitext(file)
 
     # read file as bytes
-    with open(file, 'rb') as f:
-        original_data = f.read()
 
+    try:
+        with open(file, 'rb') as f:
+            original_data = f.read()  
+    except:
+        #ask again the user a file
+        print("The file dont exist in this current location")
+        encode()
     # Calculate the padding needed
     padding = len(original_data) % 3
 
@@ -48,6 +53,8 @@ def encode():
 
     # Integrity check: decode the encoded image and compare with original data
     decoded_data = image.tobytes()
+    print(decoded_data)
+    print(original_data)
     if original_data == decoded_data:
         print("Done! Encoded image integrity verified.")
     else:
