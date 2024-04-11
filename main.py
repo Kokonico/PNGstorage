@@ -24,12 +24,12 @@ def encode():
         return  # Added return to prevent further execution
 
     # Calculate the padding needed
-    original_pixels = len(original_data) // 3
-    next_square = math.ceil(math.sqrt(original_pixels)) ** 2
-    padding_pixels = next_square - original_pixels
+
+    original_bytes = len(original_data)
+    padding_bytes = (3 - original_bytes % 3) % 3
 
     # pad the byte data
-    byte_data = original_data + b'\x00\x00\x00' * padding_pixels
+    byte_data = original_data + b'\x00' * padding_bytes
 
     # Calculate total pixels and find width and height
     total_pixels = len(byte_data) // 3
@@ -40,21 +40,18 @@ def encode():
 
     # Create a PngInfo object and add a file type to it
     pnginfo = PngImagePlugin.PngInfo()
+    pnginfo.add_text('original_bytes', str(original_bytes))
     pnginfo.add_text('file_type', file_extension)
-    pnginfo.add_text('original_pixels', str(original_pixels))
 
     # Save the new image
     image.save('output.png', pnginfo=pnginfo)
 
     # Integrity check: decode the encoded image and compare with original data
-    decoded_data = image.tobytes()[:original_pixels*3]  # ignore padding
-    if original_data == decoded_data:
-        print("Done! Encoded image integrity verified.")
-    else:
-        print("Error: Encoded image data does not match original data. Integrity check failed.")
-
-    print("Done!")
-
+    decoded_data = image.tobytes()[:original_bytes]
+    print("Verifying Integrity...")
+    for i, (original_byte, decoded_byte) in enumerate(zip(original_data, decoded_data)):
+        if original_byte != decoded_byte:
+            print(f"Difference at byte {i}: original {original_byte}, decoded {decoded_byte}")
 
 def decode():
     # Open the image
@@ -67,14 +64,18 @@ def decode():
     # Get the file type from image info
     try:
         file_type = image.text.get('file_type', '')
-        original_pixels = int(image.text.get('original_pixels', '0'))
     except AttributeError:
         print("Unable to get file type from image info, you may need to manually add the file extension")
         file_type = ''
-        original_pixels = 0
+
+    try:
+        original_bytes = int(image.text.get('original_bytes', '0'))
+    except AttributeError:
+        print("Unable to get original bytes from image info, the image cannot be decoded.")
+        return
 
     # Convert the image back to bytes
-    byte_data = image.tobytes()[:original_pixels*3]
+    byte_data = image.tobytes()[:original_bytes]
 
     # Write the bytes back to a file
     with open(f'original_file{file_type}', 'wb') as f:
