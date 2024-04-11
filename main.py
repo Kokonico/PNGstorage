@@ -51,7 +51,7 @@ def encode():
     print("Verifying Integrity...")
     for i, (original_byte, decoded_byte) in enumerate(zip(original_data, decoded_data)):
         if original_byte != decoded_byte:
-            print(f"Difference at byte {i}: original {original_byte}, decoded {decoded_byte}")
+            print(f"[WARNING]: Difference at byte {i}: original {original_byte}, decoded {decoded_byte}")
 
 def decode():
     # Open the image
