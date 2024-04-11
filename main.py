@@ -7,15 +7,20 @@ import math
 def encode():
     """main"""
     # read file
-    file = input(f"Select File (current path: {os.getcwd()}): ")
 
+    file = input(f"Select File (current path: {os.getcwd()}): ")
     # get a file extension
     _, file_extension = os.path.splitext(file)
 
     # read file as bytes
-    with open(file, 'rb') as f:
-        original_data = f.read()
 
+    try:
+        with open(file, 'rb') as f:
+            original_data = f.read()  
+    except:
+        #ask again the user a file
+        print("The file dosent exist in this current location")
+        encode()
     # Calculate the padding needed
     padding = len(original_data) % 3
 
