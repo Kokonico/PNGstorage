@@ -16,11 +16,13 @@ def encode():
 
     try:
         with open(file, 'rb') as f:
-            original_data = f.read()  
-    except:
-        #ask again the user a file
-        print("The file dosent exist in this current location")
+            original_data = f.read()
+    except FileNotFoundError:
+        # Ask the user to select an existing file
+        print("The file doesn't exist in this current location.")
         encode()
+        return  # Added return to prevent further execution
+
     # Calculate the padding needed
     padding = len(original_data) % 3
 
@@ -63,7 +65,11 @@ def encode():
 
 def decode():
     # Open the image
-    image = Image.open(input("Select Image: "))
+    try:
+        image = Image.open(input("Select Image: "))
+    except IOError:
+        print("Error: Selected file is not an image.")
+        return
 
     # Get the file type from image info
     try:
