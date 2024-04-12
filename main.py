@@ -49,9 +49,28 @@ def encode():
     # Integrity check: decode the encoded image and compare with original data
     decoded_data = image.tobytes()[:original_bytes]
     print("Verifying Integrity...")
-    for i, (original_byte, decoded_byte) in enumerate(zip(original_data, decoded_data)):
-        if original_byte != decoded_byte:
-            print(f"[WARNING]: Difference at byte {i}: original {original_byte}, decoded {decoded_byte}")
+    if original_data != decoded_data:
+        print("Integrity check failed!")
+        advanced_scan = input("Do you want to perform an advanced error scan? (y/n): ")
+        if advanced_scan.lower() == 'y':
+            error_count = 0
+            for i, (original_byte, decoded_byte) in enumerate(zip(original_data, decoded_data)):
+                if original_byte != decoded_byte:
+                    print(f"[ERROR]: Difference at byte {i}: original {original_byte}, decoded {decoded_byte}")
+                    error_count += 1
+            if error_count == 0:
+                print("No byte differences found.")
+            else:
+                print(f"{error_count} byte differences found.")
+            error_count = 0
+            if len(original_data) != len(decoded_data):
+                print(f"[ERROR]: Length mismatch: original {len(original_data)}, decoded {len(decoded_data)}")
+                print(f"Length mismatch {len(original_data) - len(decoded_data)} characters long")
+            else:
+                print("Lengths match.")
+
+        else:
+            print("advanced integrity check skipped.")
 
 def decode():
     # Open the image
@@ -76,6 +95,10 @@ def decode():
 
     # Convert the image back to bytes
     byte_data = image.tobytes()[:original_bytes]
+
+    if len(byte_data) != original_bytes:
+        print("Warning: The decoded data length does not match the original data length, decoding/encoding may have "
+              "failed.")
 
     # Write the bytes back to a file
     with open(f'original_file{file_type}', 'wb') as f:
