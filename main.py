@@ -25,7 +25,7 @@ def encode():
 
     # Calculate the padding needed
     original_bytes = len(original_data)
-    padding_bytes = int(math.pow(math.isqrt(original_bytes) + 1, 2) - original_bytes) * 3
+    padding_bytes = (int(math.pow(math.isqrt(original_bytes) + 1, 2) - original_bytes)+1) * 3
 
     # pad the byte data
     byte_data = original_data + b'\x00' * padding_bytes
