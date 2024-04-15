@@ -24,15 +24,15 @@ def encode():
         return  # Added return to prevent further execution
 
     # Calculate the padding needed
-
     original_bytes = len(original_data)
-    padding_bytes = (3 - original_bytes % 3) % 3
+    padding_bytes = int(math.pow(math.isqrt(original_bytes) + 1, 2) - original_bytes) * 3
 
     # pad the byte data
     byte_data = original_data + b'\x00' * padding_bytes
 
     # Calculate total pixels and find width and height
     total_pixels = len(byte_data) // 3
+
     width = height = math.isqrt(total_pixels)
 
     # Convert the bytes to an image
@@ -71,6 +71,7 @@ def encode():
 
         else:
             print("advanced integrity check skipped.")
+
 
 def decode():
     # Open the image
