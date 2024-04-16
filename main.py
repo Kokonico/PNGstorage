@@ -3,6 +3,9 @@ import os
 from PIL import Image, PngImagePlugin
 import math
 
+from cryptography.fernet import Fernet
+import cryptography.fernet
+
 
 def encode():
     """main"""
@@ -24,6 +27,14 @@ def encode():
         return  # Added return to prevent further execution
 
     # Calculate the padding needed
+
+    # encode the original data
+    encode_file = input("Would you like to encrypt the file? you will receive the key upon file encryption. (y/n): ")
+    if encode_file.lower() == 'y':
+        key = Fernet.generate_key()
+        cipher = Fernet(key)
+        original_data = cipher.encrypt(original_data)
+
     original_bytes = len(original_data)
     padding_bytes = (int(math.pow(math.isqrt(original_bytes) + 1, 2) - original_bytes)+1) * 3
 
@@ -42,6 +53,7 @@ def encode():
     pnginfo = PngImagePlugin.PngInfo()
     pnginfo.add_text('original_bytes', str(original_bytes))
     pnginfo.add_text('file_type', file_extension)
+    pnginfo.add_text('encrypted', "t" if encode_file.lower() == 'y' else "f")
 
     # Save the new image
     image.save('output.png', pnginfo=pnginfo)
@@ -62,7 +74,6 @@ def encode():
                 print("No byte differences found.")
             else:
                 print(f"{error_count} byte differences found.")
-            error_count = 0
             if len(original_data) != len(decoded_data):
                 print(f"[ERROR]: Length mismatch: original {len(original_data)}, decoded {len(decoded_data)}")
                 print(f"Length mismatch {len(original_data) - len(decoded_data)} characters long")
@@ -71,6 +82,9 @@ def encode():
 
         else:
             print("advanced integrity check skipped.")
+    print("Done!")
+    if encode_file.lower() == 'y':
+        print(f"Encryption Key: {key.decode()}")
 
 
 def decode():
@@ -80,6 +94,16 @@ def decode():
     except IOError:
         print("Error: Selected file is not an image.")
         return
+
+    # check if the image is encrypted
+    try:
+        if image.text.get('encrypted', 'f') == 't':
+            encrypted = True
+        else:
+            encrypted = False
+    except AttributeError:
+        print("Unable to get encryption status from image info, assuming the image is not encrypted.")
+        encrypted = False
 
     # Get the file type from image info
     try:
@@ -97,9 +121,25 @@ def decode():
     # Convert the image back to bytes
     byte_data = image.tobytes()[:original_bytes]
 
+    # Decrypt the data if it was encrypted
+
+    if encrypted:
+        key = input("Enter the encryption key of the image: ")
+        try:
+            cipher = Fernet(key.encode())
+        except ValueError:
+            print("Invalid key, decryption failed. (value error)")
+            return
+        try:
+            byte_data = cipher.decrypt(byte_data)
+        except cryptography.fernet.InvalidToken:
+            print("Invalid key, decryption failed. (invalid token)")
+            return
+
     if len(byte_data) != original_bytes:
         print("Warning: The decoded data length does not match the original data length, decoding/encoding may have "
               "failed.")
+        print(f"Original data length: {original_bytes}, Decoded data length: {len(byte_data)}")
 
     # Write the bytes back to a file
     with open(f'original_file{file_type}', 'wb') as f:
