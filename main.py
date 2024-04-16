@@ -2,9 +2,13 @@
 import os
 from PIL import Image, PngImagePlugin
 import math
+from pytextbin import *
+
+textbin = pytextbin.Textbin()
 
 
 def encode():
+
     """main"""
     # read file
 
@@ -107,15 +111,51 @@ def decode():
 
     print("Done!")
 
+#function to generate the encryption key
+def generate_key(phrase):
+    
+    phrase = {"keyword": phrase}
+
+    generated_key = textbin.json_to_base64(phrase)
+    with open("key", "w") as f:
+        key = f.write(generated_key)
+
+    print("Generated Encryption key successfully\n")
+
+def decode_key(phrase):
+    with open("key", "r") as f:
+        data = f.read()
+        decoded_key = textbin.base64_to_json(data)
+
+    return decoded_key
 
 if __name__ == "__main__":
     while True:
         choice = input("1. Encode\n2. Decode\n3. Exit\nChoice: ")
         match choice:
             case '1':
+
+                #generate encryption key
+                try:
+                    key_phrase = input("Enter a key Phrase: ")
+                    generate_key(key_phrase)
+                except ValueError:
+                    print("Enter a key phrase value")
+                
                 encode()
             case '2':
-                decode()
+
+                try:
+                    phrase = input("Enter the key Phrase: ")    
+                except ValueError:
+                    print("Enter a key phrase value")
+
+                decoded_key = decode_key(phrase)
+                if decoded_key["keyword"] == phrase:
+                    decode()
+                else:
+                    print("Wrong phrase. Try again")
+
             case '3':
                 exit(0)
             case _:
