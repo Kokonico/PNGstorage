@@ -10,7 +10,7 @@ python = "^3.12"
 pypng = "^0.20220715.0"
 pillow = "^10.3.0"
 numpy = "^1.26.4"
-cryptography = "^42.0.5"
+cryptography = "^43.0.1"
 
 
 [build-system]
